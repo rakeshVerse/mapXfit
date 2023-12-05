@@ -1,0 +1,247 @@
+/* :root {
+  --color-brand--1: #ffb545;
+  --color-brand--2: #00c46a;
+
+  --color-dark--1: #2d3439;
+  --color-dark--2: #42484d;
+
+  --color-light--1: #aaa;
+  --color-light--2: #ececec;
+
+  --color-light--3: rgb(214, 222, 224);
+} */
+
+:root {
+  /* --color-brand--1: #ff7373; */
+  --color-brand--1: #ff5959;
+  --color-brand--2: #00c46a;
+
+  --color-light--1: #fff;
+  /* --color-light--2: #ddd; */
+  --color-light--2: #dddddd4f;
+
+  /* --color-dark--1: #ccc; */
+  --color-dark--1: #cccccc3b;
+  /* --color-dark--2: #222; */
+  --color-dark--2: #555;
+  --color-dark--3: #333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-dark--2);
+  font-weight: 400;
+  background-color: var(--color-light--1);
+  height: 100vh;
+  overscroll-behavior-y: none;
+  overflow-y: hidden;
+
+  display: flex;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.intro {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #777;
+}
+
+/* Side panel */
+.workout-container {
+  background-color: var(--color-light--1);
+  flex-basis: 50rem;
+  padding: 3rem 4rem;
+}
+
+/* Map container */
+.map-container {
+  flex-grow: 1;
+  background-color: var(--color-light--2);
+}
+
+/* Logo */
+.app-logo {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* .app-logo img {
+  width: 12rem;
+} */
+
+.app-logo-svg {
+  width: 14rem;
+  height: 6rem;
+}
+
+/* Form */
+.workout,
+.workout-form {
+  background-color: var(--color-light--2);
+  padding: 1.8rem 2.5rem;
+  /* border-radius: 0.6rem; */
+  margin-bottom: 2rem;
+}
+
+.workout-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 1.5rem;
+  column-gap: 2.5rem;
+  /* transform: translateY(0rem); */
+  height: 10.2rem;
+  transition: all 0.5s;
+}
+
+.workout-form.hidden-form {
+  opacity: 0;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  visibility: hidden;
+  transform: translateY(-5rem);
+}
+
+.workout-form div {
+  display: flex;
+  gap: 1rem;
+}
+
+.workout-form label {
+  font-size: 1.6rem;
+  font-weight: 600;
+  flex-grow: 1;
+}
+
+.workout-form select {
+  cursor: pointer;
+}
+
+.workout-form select,
+.workout-form input {
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-dark--2);
+  font-size: 1.4rem;
+  width: 9rem;
+  background-color: var(--color-dark--1);
+  border: none;
+  outline: none;
+  /* border-radius: 0.3rem; */
+  padding: 0.3rem 0.8rem;
+  transition: all 0.5s;
+}
+
+.workout-form select:focus,
+.workout-form input:focus {
+  background-color: var(--color-light--1);
+}
+
+/* form error msg */
+.form-error {
+  background-color: var(--color-brand--1);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: var(--color-light--1);
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: all 1s, transform 0.5s;
+}
+
+.form-error .err-code {
+  font-weight: 800;
+}
+
+.form-error .err-msg {
+  font-weight: 600;
+}
+
+.form-error.hidden-err {
+  transform: translateY(-5rem);
+  opacity: 0;
+  padding: 0;
+  margin: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+/* Workout */
+
+.workout-list {
+  /* container top padding + logo height + logo margin bottom + margin bottom
+  i.e. 3 + 6 + 3 + 3 = 15rem
+  */
+  height: calc(100vh - 15rem);
+  overflow-y: scroll;
+}
+
+.workout {
+  list-style: none;
+  cursor: pointer;
+}
+
+/* border for running */
+.workout-1 {
+  border-left: 0.7rem solid var(--color-brand--1);
+}
+/* border for cycling */
+.workout-2 {
+  border-left: 0.7rem solid var(--color-brand--2);
+}
+
+.workout-details-box {
+  display: flex;
+  justify-content: space-between;
+}
+
+.workout-title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.workout-icon {
+  font-size: 2.4rem;
+}
+.workout-value {
+  font-size: 1.9rem;
+  color: var(--color-dark--3);
+}
+.workout-unit {
+  font-size: 1.3rem;
+  color: var(--color-dark--3);
+}
+
+/* Map pop-up */
+.leaflet-popup .leaflet-popup-content-wrapper {
+  background-color: var(--color-light--1);
+  color: var(--color-dark--2);
+  border-radius: 0;
+}
+
+.running-popup .leaflet-popup-content-wrapper {
+  border-left: 0.7rem solid var(--color-brand--1);
+}
+.cycling-popup .leaflet-popup-content-wrapper {
+  border-left: 0.7rem solid var(--color-brand--2);
+}
+
+.leaflet-popup .leaflet-popup-content {
+  font-size: 1.8rem;
+}
+
+.leaflet-popup .leaflet-popup-tip {
+  background-color: var(--color-light--1);
+}
