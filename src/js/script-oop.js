@@ -42,7 +42,6 @@ class MapHandler {
     // On error: load world map
     const error = () => {
       this.#loadMap(0, 0, this.#mapZoomWorld);
-      console.log(`Couldn't get your location!`);
     };
 
     /* If geolocation is available, get user's position*/
@@ -70,10 +69,11 @@ class MapHandler {
     this.#mapEvent = e; // store map event
   }
 
-  get init() {
-    return this.#init;
+  init(uiManager, formHandler) {
+    this.#init(uiManager, formHandler);
   }
 
+  // Public APIs
   get map() {
     return this.#map;
   }
@@ -90,12 +90,12 @@ class MapHandler {
     return this.#mapEvent;
   }
 
-  get loadMap() {
-    return this.#loadMap;
+  loadMap(lat, lng, zoom) {
+    this.#loadMap(lat, lng, zoom);
   }
 
-  get getUserPosition() {
-    return this.#getUserPosition;
+  getUserPosition() {
+    this.#getUserPosition();
   }
 }
 
@@ -103,6 +103,7 @@ class LocalStorageHandler {
   #mapHandler;
   #workouts;
   #uiManager;
+  #localWorkouts;
 
   constructor(workouts, mapHandler, uiManager) {
     this.#mapHandler = mapHandler;
@@ -123,7 +124,8 @@ class LocalStorageHandler {
    * @returns true | false
    */
   #isLocalStorage() {
-    return localStorage.getItem(LOCAL_STORAGE_KEY) ? true : false;
+    this.#localWorkouts = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return !this.#localWorkouts ? false : true;
   }
 
   /**
@@ -143,20 +145,21 @@ class LocalStorageHandler {
   }
 
   #updateAppState() {
-    const localWorkouts = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-    this.#workouts.push(...localWorkouts);
+    // push all the workout objects inside localWorkouts[] into workouts[]
+    this.#workouts.push(...JSON.parse(this.#localWorkouts));
   }
 
-  get storeWorkoutsLocally() {
-    return this.#storeWorkoutsLocally;
+  // Public APIs
+  storeWorkoutsLocally() {
+    this.#storeWorkoutsLocally();
   }
 
-  get isLocalStorage() {
-    return this.#isLocalStorage;
+  isLocalStorage() {
+    return this.#isLocalStorage();
   }
 
-  get handleLocalStorage() {
-    return this.#handleLocalStorage;
+  handleLocalStorage() {
+    this.#handleLocalStorage();
   }
 }
 
@@ -237,10 +240,6 @@ class FormHandler {
   #hideFormErr() {
     if (!this.#formWorkoutErr.classList.contains('hidden-err'))
       this.#formWorkoutErr.classList.add('hidden-err');
-  }
-
-  get showForm() {
-    return this.#showForm;
   }
 
   /**
@@ -341,6 +340,11 @@ class FormHandler {
 
     // Store workouts in localStorage
     this.#localStorageHandler.storeWorkoutsLocally();
+  }
+
+  // Public APIs
+  showForm() {
+    this.#showForm();
   }
 }
 
@@ -473,20 +477,21 @@ class UIManager {
     );
   }
 
-  get renderWorkoutListItem() {
-    return this.#renderWorkoutListItem;
+  // Public APIs
+  renderWorkoutListItem(workout) {
+    this.#renderWorkoutListItem(workout);
   }
 
-  get renderWorkoutMarkerAndPopup() {
-    return this.#renderWorkoutMarkerAndPopup;
+  renderWorkoutMarkerAndPopup(workout) {
+    this.#renderWorkoutMarkerAndPopup(workout);
   }
 
-  get renderUI() {
-    return this.#renderUI;
+  renderUI(workouts) {
+    this.#renderUI(workouts);
   }
 
-  get hideIntro() {
-    return this.#hideIntro;
+  hideIntro() {
+    this.#hideIntro();
   }
 }
 
@@ -501,7 +506,7 @@ class App {
     this.#mapHandler = new MapHandler();
     this.#uiManager = new UIManager(this.#mapHandler);
     // prettier-ignore
-    this.#localStorageHandler = new LocalStorageHandler(this.#workouts,this.#mapHandler,  this.#uiManager);
+    this.#localStorageHandler = new LocalStorageHandler(this.#workouts, this.#mapHandler, this.#uiManager);
     // prettier-ignore
     this.#formHandler = new FormHandler(this.#workouts, this.#mapHandler, this.#uiManager, this.#localStorageHandler);
     this.#mapHandler.init(this.#uiManager, this.#formHandler);
