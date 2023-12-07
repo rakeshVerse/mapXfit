@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-import { LOCAL_STORAGE_KEY } from "./config.js";
+import { LOCAL_STORAGE_KEY } from './config.js';
 
 const config = {
   1: {
@@ -21,12 +21,20 @@ class MapHandler {
   #map;
   #mapZoom = 13;
   #mapZoomWorld = 2.5; // zoom level to show entire world
+  #mapEvent;
+  #uiManager;
+  #formHandler;
 
   constructor() {}
 
+  #init(uiManager, formHandler) {
+    this.#uiManager = uiManager;
+    this.#formHandler = formHandler;
+  }
+
   #getUserPosition() {
     // On success: load map for user's coords
-    const success = (position) => {
+    const success = position => {
       const { latitude, longitude } = position.coords;
       this.#loadMap(latitude, longitude, this.#mapZoom);
     };
@@ -38,19 +46,32 @@ class MapHandler {
     };
 
     /* If geolocation is available, get user's position*/
-    if ("geolocation" in navigator) {
+    if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(success, error);
     } else error();
   }
 
   #loadMap(lat, lng, zoom) {
-    this.#map = L.map("map").setView([lat, lng], zoom);
+    this.#map = L.map('map').setView([lat, lng], zoom);
 
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution:
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.#map);
+
+    // Register map click event
+    this.#map.on('click', this.#onMapClick.bind(this));
+  }
+
+  #onMapClick(e) {
+    this.#formHandler.showForm();
+    this.#uiManager.hideIntro();
+    this.#mapEvent = e; // store map event
+  }
+
+  get init() {
+    return this.#init;
   }
 
   get map() {
@@ -63,6 +84,10 @@ class MapHandler {
 
   get mapZoomWorld() {
     return this.#mapZoomWorld;
+  }
+
+  get mapEvent() {
+    return this.#mapEvent;
   }
 
   get loadMap() {
@@ -79,10 +104,17 @@ class LocalStorageHandler {
   #workouts;
   #uiManager;
 
-  constructor(mapHandler, workouts, uiManager) {
+  constructor(workouts, mapHandler, uiManager) {
     this.#mapHandler = mapHandler;
     this.#workouts = workouts;
     this.#uiManager = uiManager;
+  }
+
+  /**
+   * Store workouts in localStorage
+   */
+  #storeWorkoutsLocally() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
   }
 
   /**
@@ -115,6 +147,10 @@ class LocalStorageHandler {
     this.#workouts.push(...localWorkouts);
   }
 
+  get storeWorkoutsLocally() {
+    return this.#storeWorkoutsLocally;
+  }
+
   get isLocalStorage() {
     return this.#isLocalStorage;
   }
@@ -124,23 +160,69 @@ class LocalStorageHandler {
   }
 }
 
-class UIManager {
+class FormHandler {
   #mapHandler;
-  #containerWorkoutList;
+  #uiManager;
+  #localStorageHandler;
   #formWorkout;
+  #formWorkoutErr;
+  #inputElevation;
   #inputDistance;
-  #intro;
+  #typeInputs;
+  #typeInputBoxes;
+  #typeSelect;
+  #workouts;
 
-  constructor(mapHandler) {
+  constructor(workouts, mapHandler, uiManager, localStorageHandler) {
+    // Instances
+    this.#workouts = workouts;
     this.#mapHandler = mapHandler;
-    this.#containerWorkoutList = document.querySelector(".workout-list");
-    this.#formWorkout = document.querySelector(".workout-form");
-    this.#inputDistance = document.getElementById("distance");
-    this.#intro = document.querySelector(".intro");
+    this.#uiManager = uiManager;
+    this.#localStorageHandler = localStorageHandler;
+
+    // DOM Elements
+    this.#formWorkout = document.querySelector('.workout-form');
+    this.#formWorkoutErr = document.querySelector('.form-error');
+    this.#inputDistance = document.getElementById('distance');
+    this.#inputElevation = document.querySelector('.workout-elevation');
+    this.#typeInputs = document.querySelectorAll('.type-toggle input');
+    this.#typeInputBoxes = document.querySelectorAll('.type-toggle');
+    this.#typeSelect = document.querySelector('#workout-type');
+
+    // Initially set option to running, disable elevation input & clear all inputs
+    this.#typeSelect.value = 1;
+    this.#inputElevation.disabled = true;
+    this.#clearInputs();
+
+    // EVENT HANDLERS
+    // On select change, show/Hide Cadence/Elevation
+    // prettier-ignore
+    this.#typeSelect.addEventListener('change', this.#toggleUnitByType.bind(this));
+    // prettier-ignore
+    this.#formWorkout.addEventListener('submit', this.#formSubmitCB.bind(this));
+    this.#formWorkoutErr.addEventListener('click', this.#hideFormErr);
+  }
+
+  /**
+   * Show/Hide Cadence/Elevation
+   */
+  #toggleUnitByType() {
+    this.#typeInputBoxes.forEach((inputBox, i) => {
+      // Toggle hidden forEach inputBox
+      inputBox.classList.toggle('hidden');
+
+      // Add/remove attribute 'disabled' to input
+      // Note: disabled input will not be part of FormData()
+      if (inputBox.classList.contains('hidden'))
+        this.#typeInputs[i].disabled = true;
+      else this.#typeInputs[i].disabled = false;
+
+      this.#inputDistance.focus();
+    });
   }
 
   #showForm() {
-    this.#formWorkout.classList.remove("hidden-form");
+    this.#formWorkout.classList.remove('hidden-form');
 
     // set focus on first input when the form appears
     setTimeout(() => {
@@ -149,12 +231,140 @@ class UIManager {
   }
 
   #hideForm() {
-    this.#formWorkout.classList.add("hidden-form");
+    this.#formWorkout.classList.add('hidden-form');
+  }
+
+  #hideFormErr() {
+    if (!this.#formWorkoutErr.classList.contains('hidden-err'))
+      this.#formWorkoutErr.classList.add('hidden-err');
+  }
+
+  get showForm() {
+    return this.#showForm;
+  }
+
+  /**
+   * Sanitize inputs: trim, convert numeric sting to number
+   * @param {object} formData formData
+   * @returns Object contains sanitized inputs
+   */
+  #getSanitizedObj(formData) {
+    const obj = {};
+    for (const [key, value] of formData) {
+      obj[key] = +value.trim();
+    }
+
+    return obj;
+  }
+
+  // All inputs must be positive numbers
+  #validateInputs(inputs) {
+    const values = Object.values(inputs);
+
+    for (const value of values) {
+      if (value <= 0 || !isFinite(value)) return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Clear all the input fields
+   * @param {Object} form form element
+   * @returns
+   */
+  #clearInputs() {
+    this.#formWorkout
+      .querySelectorAll('input')
+      .forEach(input => (input.value = ''));
+  }
+
+  /**
+   * Add additional workout info to workout object: lat, lng, date & speed
+   * @param {object} obj Workout object
+   */
+  #addWorkoutInfo(obj) {
+    // Calculate speed
+    const calcSpeed = (type, distance, time) => {
+      if (type === 1) return (time / distance).toFixed(1);
+      if (type === 2) return (distance / (time / 60)).toFixed(1);
+    };
+
+    // Format date: Short month followed by 2 digit date
+    const formatDate = date =>
+      `${date.toLocaleString('default', { month: 'short', day: '2-digit' })}`;
+
+    // Add properties to the workout object
+    obj.coords = this.#mapHandler.mapEvent.latlng;
+    obj.date = new Date().toISOString();
+    obj.speed = calcSpeed(obj.type, obj.distance, obj.duration);
+    obj.title = `${config[obj.type].workout} on ${formatDate(
+      new Date(obj.date)
+    )}`;
+  }
+
+  #formSubmitCB(e) {
+    e.preventDefault();
+
+    // Get form data
+    const formData = new FormData(this.#formWorkout);
+
+    // Sanitize form data
+    const workoutObj = this.#getSanitizedObj(formData);
+
+    // Validate: if not valid show err & return
+    if (!this.#validateInputs(workoutObj)) {
+      this.#formWorkoutErr.classList.remove('hidden-err');
+      return;
+    }
+
+    // Remove error message, if already shown
+    this.#hideFormErr();
+
+    // Clear form inputs
+    this.#clearInputs(this.#formWorkout);
+
+    // Hide form
+    this.#hideForm();
+
+    // Add additional info to workout object
+    this.#addWorkoutInfo(workoutObj);
+
+    // Render workout list item
+    this.#uiManager.renderWorkoutListItem(workoutObj);
+
+    // Render marker & popup
+    this.#uiManager.renderWorkoutMarkerAndPopup(workoutObj);
+
+    // Push workout object to app state
+    this.#workouts.push(workoutObj);
+
+    // Store workouts in localStorage
+    this.#localStorageHandler.storeWorkoutsLocally();
+  }
+}
+
+class UIManager {
+  #mapHandler;
+  #containerWorkoutList;
+  #intro;
+
+  constructor(mapHandler) {
+    // DOM elements
+    this.#containerWorkoutList = document.querySelector('.workout-list');
+    this.#intro = document.querySelector('.intro');
+
+    // Instances
+    this.#mapHandler = mapHandler;
+
+    // EVENT HANDLERS
+    // prettier-ignore
+    this.#containerWorkoutList.addEventListener('click', this.#containerWorkoutCB.bind(this))
   }
 
   #hideIntro() {
-    if (!this.#intro.classList.contains("hidden"))
-      this.#intro.classList.add("hidden");
+    if (!this.#intro.classList.contains('hidden'))
+      this.#intro.classList.add('hidden');
   }
 
   /**
@@ -162,8 +372,8 @@ class UIManager {
    * @param {object} workout Workout object
    */
   #renderWorkoutListItem(workout) {
-    const getWorkoutMeasureEl = (workout) => {
-      let measure = "";
+    const getWorkoutMeasureEl = workout => {
+      let measure = '';
 
       switch (workout.type) {
         case 1:
@@ -214,7 +424,7 @@ class UIManager {
       </div>
     </li>`;
 
-    this.#containerWorkoutList.insertAdjacentHTML("afterbegin", html);
+    this.#containerWorkoutList.insertAdjacentHTML('afterbegin', html);
   }
 
   #renderWorkoutMarkerAndPopup(workout) {
@@ -223,7 +433,7 @@ class UIManager {
 
     // Popup
     const options = {
-      maxWidth: "500",
+      maxWidth: '500',
       closeOnClick: false,
       autoClose: false,
       className: config[workout.type].popupClass,
@@ -240,37 +450,61 @@ class UIManager {
   #renderUI(workouts) {
     this.#hideIntro();
 
-    workouts.forEach((workout) => {
+    workouts.forEach(workout => {
       this.#renderWorkoutListItem(workout);
       this.#renderWorkoutMarkerAndPopup(workout);
     });
 
     // Fit all markers on the view port
-    const markers = workouts.map((workout) => L.marker(workout.coords));
+    const markers = workouts.map(workout => L.marker(workout.coords));
     this.#mapHandler.map.flyToBounds(L.featureGroup(markers).getBounds(), {
       padding: L.point(50, 50),
     });
   }
 
+  #containerWorkoutCB(e) {
+    const workout = e.target.closest('.workout');
+    if (!workout) return;
+
+    // pan
+    this.#mapHandler.map.flyTo(
+      [workout.dataset.lat, workout.dataset.lng],
+      this.#mapHandler.mapZoom
+    );
+  }
+
+  get renderWorkoutListItem() {
+    return this.#renderWorkoutListItem;
+  }
+
+  get renderWorkoutMarkerAndPopup() {
+    return this.#renderWorkoutMarkerAndPopup;
+  }
+
   get renderUI() {
     return this.#renderUI;
+  }
+
+  get hideIntro() {
+    return this.#hideIntro;
   }
 }
 
 class App {
+  #workouts = [];
   #mapHandler;
   #localStorageHandler;
   #uiManager;
-  #workouts = [];
+  #formHandler;
 
   constructor() {
     this.#mapHandler = new MapHandler();
     this.#uiManager = new UIManager(this.#mapHandler);
-    this.#localStorageHandler = new LocalStorageHandler(
-      this.#mapHandler,
-      this.#workouts,
-      this.#uiManager
-    );
+    // prettier-ignore
+    this.#localStorageHandler = new LocalStorageHandler(this.#workouts,this.#mapHandler,  this.#uiManager);
+    // prettier-ignore
+    this.#formHandler = new FormHandler(this.#workouts, this.#mapHandler, this.#uiManager, this.#localStorageHandler);
+    this.#mapHandler.init(this.#uiManager, this.#formHandler);
   }
 
   init() {
@@ -278,8 +512,6 @@ class App {
     this.#localStorageHandler.isLocalStorage()
       ? this.#localStorageHandler.handleLocalStorage()
       : this.#mapHandler.getUserPosition();
-
-    console.log(this);
   }
 }
 
