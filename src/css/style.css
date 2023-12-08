@@ -99,6 +99,7 @@ body {
 }
 
 .workout-form {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   row-gap: 1.5rem;
@@ -177,6 +178,24 @@ body {
   margin: 0;
   height: 0;
   visibility: hidden;
+}
+
+/* form close btn */
+.btn-form-close {
+  display: none;
+  position: absolute;
+  right: 2%;
+  font-size: 1.5rem;
+  color: var(--color-brand--1);
+  cursor: pointer;
+}
+
+.btn-form-close:hover {
+  color: var(--color-font--1);
+}
+
+.workout-form:hover > .btn-form-close {
+  display: inline-block;
 }
 
 /* Workout */

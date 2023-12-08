@@ -171,6 +171,7 @@ class FormHandler {
   #typeInputs;
   #typeInputBoxes;
   #typeSelect;
+  #btnFormClose;
   #workouts;
   #config;
 
@@ -185,6 +186,7 @@ class FormHandler {
     // DOM Elements
     this.#formWorkout = document.querySelector('.workout-form');
     this.#formWorkoutErr = document.querySelector('.form-error');
+    this.#btnFormClose = document.querySelector('.btn-form-close');
     this.#inputDistance = document.getElementById('distance');
     this.#inputElevation = document.querySelector('.workout-elevation');
     this.#typeInputs = document.querySelectorAll('.type-toggle input');
@@ -204,6 +206,7 @@ class FormHandler {
     this.#formWorkout.addEventListener('submit', this.#formSubmitCB.bind(this));
     // prettier-ignore
     this.#formWorkoutErr.addEventListener('click', this.#hideFormErr.bind(this));
+    this.#btnFormClose.addEventListener('click', this.#hideForm.bind(this));
   }
 
   /**
@@ -235,6 +238,7 @@ class FormHandler {
 
   #hideForm() {
     this.#formWorkout.classList.add('hidden-form');
+    this.#clearInputs();
   }
 
   #hideFormErr() {
@@ -313,9 +317,6 @@ class FormHandler {
 
     // Remove error message, if already shown
     this.#hideFormErr();
-
-    // Clear form inputs
-    this.#clearInputs(this.#formWorkout);
 
     // Hide form
     this.#hideForm();
