@@ -2,6 +2,8 @@ export const LOCAL_STORAGE_KEY = 'workouts';
 export const MAP_ZOOM = 13;
 export const MAP_ZOOM_WORLD = 2.5;
 export const WORKOUT_TYPES = ['running', 'cycling'];
+export const DARK_ICON = '🌓';
+export const LIGHT_ICON = '🌗';
 export const CONFIG = {
   1: {
     logo: `🏃🏾`,

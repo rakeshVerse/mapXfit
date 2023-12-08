@@ -5,6 +5,8 @@ import {
   MAP_ZOOM,
   MAP_ZOOM_WORLD,
   CONFIG,
+  LIGHT_ICON,
+  DARK_ICON,
 } from './config.js';
 
 class MapHandler {
@@ -187,7 +189,7 @@ class FormHandler {
     this.#inputElevation = document.querySelector('.workout-elevation');
     this.#typeInputs = document.querySelectorAll('.type-toggle input');
     this.#typeInputBoxes = document.querySelectorAll('.type-toggle');
-    this.#typeSelect = document.querySelector('#workout-type');
+    this.#typeSelect = document.getElementById('workout-type');
 
     // Initially set option to running, disable elevation input & clear all inputs
     this.#typeSelect.value = 1;
@@ -345,24 +347,34 @@ class UIManager {
   #containerWorkoutList;
   #intro;
   #appLogo;
+  #btnTheme;
+  #html;
+  #theme = 'light';
   #workouts;
   #config;
+  #lightIcon;
+  #darkIcon;
 
-  constructor(workouts, config, mapHandler) {
+  constructor(workouts, config, lightIcon, darkIcon, mapHandler) {
     // DOM elements
     this.#containerWorkoutList = document.querySelector('.workout-list');
     this.#intro = document.querySelector('.intro');
     this.#appLogo = document.querySelector('.app-logo-svg');
+    this.#btnTheme = document.getElementById('btn-theme');
+    this.#html = document.querySelector('html');
 
     // Setting attributes
     this.#workouts = workouts;
     this.#config = config;
+    this.#lightIcon = lightIcon;
+    this.#darkIcon = darkIcon;
     this.#mapHandler = mapHandler;
 
     // EVENT HANDLERS
     // prettier-ignore
     this.#containerWorkoutList.addEventListener('click', this.#containerWorkoutCB.bind(this))
     this.#appLogo.addEventListener('click', this.#showAllMarkers.bind(this));
+    this.#btnTheme.addEventListener('click', this.#toggleTheme.bind(this));
   }
 
   #hideIntro() {
@@ -471,6 +483,15 @@ class UIManager {
     );
   }
 
+  #toggleTheme(e) {
+    e.preventDefault();
+    this.#theme = this.#theme === 'light' ? 'dark' : 'light';
+    this.#btnTheme.textContent =
+      this.#theme === 'light' ? this.#darkIcon : this.#lightIcon;
+    this.#html.classList.toggle('dark', this.#theme === 'dark');
+    this.#html.classList.toggle('light', this.#theme === 'light');
+  }
+
   // Public APIs
   renderWorkoutListItem(workout) {
     this.#renderWorkoutListItem(workout);
@@ -498,7 +519,13 @@ class App {
 
   constructor() {
     this.#mapHandler = new MapHandler(MAP_ZOOM, MAP_ZOOM_WORLD);
-    this.#uiManager = new UIManager(this.#workouts, CONFIG, this.#mapHandler);
+    this.#uiManager = new UIManager(
+      this.#workouts,
+      CONFIG,
+      LIGHT_ICON,
+      DARK_ICON,
+      this.#mapHandler
+    );
     // prettier-ignore
     this.#localStorageHandler = new LocalStorageHandler(this.#workouts, LOCAL_STORAGE_KEY, this.#mapHandler, this.#uiManager);
     // prettier-ignore

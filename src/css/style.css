@@ -1,30 +1,31 @@
-/* :root {
-  --color-brand--1: #ffb545;
-  --color-brand--2: #00c46a;
-
-  --color-dark--1: #2d3439;
-  --color-dark--2: #42484d;
-
-  --color-light--1: #aaa;
-  --color-light--2: #ececec;
-
-  --color-light--3: rgb(214, 222, 224);
-} */
-
 :root {
   /* --color-brand--1: #ff7373; */
   --color-brand--1: #ff5959;
   --color-brand--2: #00c46a;
+}
 
-  --color-light--1: #fff;
-  /* --color-light--2: #ddd; */
-  --color-light--2: #dddddd4f;
+.light {
+  --color-bg--1: #fff;
+  --color-bg--2: #f5f5f5;
+  --color-bg--3: #cccccc3b;
+  /* --color-bg--2: #ddd; */
+  /* --color-bg--3: #ccc; */
 
-  /* --color-dark--1: #ccc; */
-  --color-dark--1: #cccccc3b;
-  /* --color-dark--2: #222; */
-  --color-dark--2: #555;
-  --color-dark--3: #333;
+  --color-font--1: #555;
+  --color-font--2: #333;
+  /* --color-font--1: #222; */
+}
+
+.dark {
+  /* --color-bg--1: #aaa; */
+  --color-bg--1: #2d3439;
+  --color-bg--2: #42484d;
+  --color-bg--3: #3b3d3f;
+
+  --color-font--1: #fff;
+  --color-font--2: #e6e3e3;
+
+  --color-light--3: rgb(214, 222, 224);
 }
 
 * {
@@ -39,9 +40,9 @@ html {
 
 body {
   font-family: 'Manrope', sans-serif;
-  color: var(--color-dark--2);
+  color: var(--color-font--1);
   font-weight: 400;
-  background-color: var(--color-light--1);
+  background-color: var(--color-bg--1);
   height: 100vh;
   overscroll-behavior-y: none;
   overflow-y: hidden;
@@ -61,7 +62,7 @@ body {
 
 /* Side panel */
 .workout-container {
-  background-color: var(--color-light--1);
+  background-color: var(--color-bg--1);
   flex-basis: 50rem;
   padding: 3rem 4rem;
 }
@@ -69,7 +70,7 @@ body {
 /* Map container */
 .map-container {
   flex-grow: 1;
-  background-color: var(--color-light--2);
+  background-color: var(--color-bg--2);
 }
 
 /* Logo */
@@ -91,7 +92,7 @@ body {
 /* Form */
 .workout,
 .workout-form {
-  background-color: var(--color-light--2);
+  background-color: var(--color-bg--2);
   padding: 1.8rem 2.5rem;
   /* border-radius: 0.6rem; */
   margin-bottom: 2rem;
@@ -134,10 +135,10 @@ body {
 .workout-form select,
 .workout-form input {
   font-family: 'Manrope', sans-serif;
-  color: var(--color-dark--2);
+  color: var(--color-font--1);
   font-size: 1.4rem;
   width: 9rem;
-  background-color: var(--color-dark--1);
+  background-color: var(--color-bg--3);
   border: none;
   outline: none;
   /* border-radius: 0.3rem; */
@@ -147,7 +148,7 @@ body {
 
 .workout-form select:focus,
 .workout-form input:focus {
-  background-color: var(--color-light--1);
+  background-color: var(--color-bg--1);
 }
 
 /* form error msg */
@@ -155,7 +156,7 @@ body {
   background-color: var(--color-brand--1);
   padding: 1rem;
   margin-bottom: 1rem;
-  color: var(--color-light--1);
+  color: var(--color-bg--1);
   font-size: 1.6rem;
   cursor: pointer;
   transition: all 1s, transform 0.5s;
@@ -218,17 +219,17 @@ body {
 }
 .workout-value {
   font-size: 1.9rem;
-  color: var(--color-dark--3);
+  color: var(--color-font--2);
 }
 .workout-unit {
   font-size: 1.3rem;
-  color: var(--color-dark--3);
+  color: var(--color-font--2);
 }
 
 /* Map pop-up */
 .leaflet-popup .leaflet-popup-content-wrapper {
-  background-color: var(--color-light--1);
-  color: var(--color-dark--2);
+  background-color: var(--color-bg--2);
+  color: var(--color-font--1);
   border-radius: 0;
 }
 
@@ -244,5 +245,22 @@ body {
 }
 
 .leaflet-popup .leaflet-popup-tip {
-  background-color: var(--color-light--1);
+  background-color: var(--color-bg--2);
+}
+
+#btn-theme {
+  position: absolute;
+  right: 1%;
+  top: 1%;
+  z-index: 10000;
+
+  background-color: #fff;
+  text-decoration: none;
+  font-size: 4.5rem;
+  height: 5rem;
+  width: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3rem;
 }
