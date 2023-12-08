@@ -1,31 +1,24 @@
 'use strict';
 
-import { LOCAL_STORAGE_KEY } from './config.js';
-
-const config = {
-  1: {
-    logo: `🏃🏾`,
-    workout: `Running`,
-    speedUnit: `MIN/KM`,
-    popupClass: `running-popup`,
-  },
-  2: {
-    logo: `🚴‍♀️`,
-    workout: `Cycling`,
-    speedUnit: `KM/H`,
-    popupClass: `cycling-popup`,
-  },
-};
+import {
+  LOCAL_STORAGE_KEY,
+  MAP_ZOOM,
+  MAP_ZOOM_WORLD,
+  CONFIG,
+} from './config.js';
 
 class MapHandler {
   #map;
-  #mapZoom = 13;
-  #mapZoomWorld = 2.5; // zoom level to show entire world
+  #mapZoom;
+  #mapZoomWorld; // zoom level to show entire world
   #mapEvent;
   #uiManager;
   #formHandler;
 
-  constructor() {}
+  constructor(mapZoom, mapZoomWorld) {
+    this.#mapZoom = mapZoom;
+    this.#mapZoomWorld = mapZoomWorld;
+  }
 
   #init(uiManager, formHandler) {
     this.#uiManager = uiManager;
@@ -104,10 +97,12 @@ class LocalStorageHandler {
   #workouts;
   #uiManager;
   #localWorkouts;
+  #localStorageKey;
 
-  constructor(workouts, mapHandler, uiManager) {
-    this.#mapHandler = mapHandler;
+  constructor(workouts, localStorageKey, mapHandler, uiManager) {
     this.#workouts = workouts;
+    this.#localStorageKey = localStorageKey;
+    this.#mapHandler = mapHandler;
     this.#uiManager = uiManager;
   }
 
@@ -115,7 +110,7 @@ class LocalStorageHandler {
    * Store workouts in localStorage
    */
   #storeWorkoutsLocally() {
-    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+    localStorage.setItem(this.#localStorageKey, JSON.stringify(this.#workouts));
   }
 
   /**
@@ -124,7 +119,7 @@ class LocalStorageHandler {
    * @returns true | false
    */
   #isLocalStorage() {
-    this.#localWorkouts = localStorage.getItem(LOCAL_STORAGE_KEY);
+    this.#localWorkouts = localStorage.getItem(this.#localStorageKey);
     return !this.#localWorkouts ? false : true;
   }
 
@@ -175,10 +170,12 @@ class FormHandler {
   #typeInputBoxes;
   #typeSelect;
   #workouts;
+  #config;
 
-  constructor(workouts, mapHandler, uiManager, localStorageHandler) {
-    // Instances
+  constructor(workouts, config, mapHandler, uiManager, localStorageHandler) {
+    // Setting properties
     this.#workouts = workouts;
+    this.#config = config;
     this.#mapHandler = mapHandler;
     this.#uiManager = uiManager;
     this.#localStorageHandler = localStorageHandler;
@@ -203,7 +200,8 @@ class FormHandler {
     this.#typeSelect.addEventListener('change', this.#toggleUnitByType.bind(this));
     // prettier-ignore
     this.#formWorkout.addEventListener('submit', this.#formSubmitCB.bind(this));
-    this.#formWorkoutErr.addEventListener('click', this.#hideFormErr);
+    // prettier-ignore
+    this.#formWorkoutErr.addEventListener('click', this.#hideFormErr.bind(this));
   }
 
   /**
@@ -258,13 +256,7 @@ class FormHandler {
 
   // All inputs must be positive numbers
   #validateInputs(inputs) {
-    const values = Object.values(inputs);
-
-    for (const value of values) {
-      if (value <= 0 || !isFinite(value)) return false;
-    }
-
-    return true;
+    return Object.values(inputs).every(value => value > 0 && isFinite(value));
   }
 
   /**
@@ -297,7 +289,7 @@ class FormHandler {
     obj.coords = this.#mapHandler.mapEvent.latlng;
     obj.date = new Date().toISOString();
     obj.speed = calcSpeed(obj.type, obj.distance, obj.duration);
-    obj.title = `${config[obj.type].workout} on ${formatDate(
+    obj.title = `${this.#config[obj.type].workout} on ${formatDate(
       new Date(obj.date)
     )}`;
   }
@@ -352,13 +344,15 @@ class UIManager {
   #mapHandler;
   #containerWorkoutList;
   #intro;
+  #config;
 
-  constructor(mapHandler) {
+  constructor(config, mapHandler) {
     // DOM elements
     this.#containerWorkoutList = document.querySelector('.workout-list');
     this.#intro = document.querySelector('.intro');
 
-    // Instances
+    // setting attributes
+    this.#config = config;
     this.#mapHandler = mapHandler;
 
     // EVENT HANDLERS
@@ -377,26 +371,14 @@ class UIManager {
    */
   #renderWorkoutListItem(workout) {
     const getWorkoutMeasureEl = workout => {
-      let measure = '';
+      const icon = workout.type === 1 ? '👣' : '⛰';
+      const value = workout.type === 1 ? workout.cadence : workout.elevation;
+      const unit = workout.type === 1 ? 'SPM' : 'M';
 
-      switch (workout.type) {
-        case 1:
-          // Running
-          measure = `
-      <span class="workout-icon">👣</span>
-      <span class="workout-value">${workout.cadence}</span>
-      <span class="workout-unit">SPM</span>`;
-          break;
-        case 2:
-          // Cycling
-          measure = `
-      <span class="workout-icon">⛰</span>
-      <span class="workout-value">${workout.elevation}</span>
-      <span class="workout-unit">M</span>`;
-          break;
-      }
-
-      return measure;
+      return `
+      <span class="workout-icon">${icon}</span>
+      <span class="workout-value">${value}</span>
+      <span class="workout-unit">${unit}</span>`;
     };
 
     let html = `
@@ -407,7 +389,7 @@ class UIManager {
 
       <div class="workout-details-box">
         <div class="workout-details">
-          <span class="workout-icon">${config[workout.type].logo}</span>
+          <span class="workout-icon">${this.#config[workout.type].logo}</span>
           <span class="workout-value">${workout.distance}</span>
           <span class="workout-unit">KM</span>
         </div>
@@ -421,7 +403,9 @@ class UIManager {
         <div class="workout-details">
           <span class="workout-icon">⚡️</span>
           <span class="workout-value">${workout.speed}</span>
-          <span class="workout-unit">${config[workout.type].speedUnit}</span>
+          <span class="workout-unit">${
+            this.#config[workout.type].speedUnit
+          }</span>
         </div>
 
         <div class="workout-details">${getWorkoutMeasureEl(workout)}</div>
@@ -440,10 +424,10 @@ class UIManager {
       maxWidth: '500',
       closeOnClick: false,
       autoClose: false,
-      className: config[workout.type].popupClass,
+      className: this.#config[workout.type].popupClass,
     };
 
-    const content = `${config[workout.type].logo} ${workout.title}`;
+    const content = `${this.#config[workout.type].logo} ${workout.title}`;
     marker.bindPopup(content, options).openPopup();
   }
 
@@ -503,12 +487,12 @@ class App {
   #formHandler;
 
   constructor() {
-    this.#mapHandler = new MapHandler();
-    this.#uiManager = new UIManager(this.#mapHandler);
+    this.#mapHandler = new MapHandler(MAP_ZOOM, MAP_ZOOM_WORLD);
+    this.#uiManager = new UIManager(CONFIG, this.#mapHandler);
     // prettier-ignore
-    this.#localStorageHandler = new LocalStorageHandler(this.#workouts, this.#mapHandler, this.#uiManager);
+    this.#localStorageHandler = new LocalStorageHandler(this.#workouts, LOCAL_STORAGE_KEY, this.#mapHandler, this.#uiManager);
     // prettier-ignore
-    this.#formHandler = new FormHandler(this.#workouts, this.#mapHandler, this.#uiManager, this.#localStorageHandler);
+    this.#formHandler = new FormHandler(this.#workouts, CONFIG, this.#mapHandler, this.#uiManager, this.#localStorageHandler);
     this.#mapHandler.init(this.#uiManager, this.#formHandler);
   }
 
