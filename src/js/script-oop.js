@@ -338,6 +338,10 @@ class FormHandler {
   }
 
   // Public APIs
+  get formWorkout() {
+    return this.#formWorkout;
+  }
+
   showForm() {
     this.#showForm();
   }
@@ -345,6 +349,7 @@ class FormHandler {
 
 class UIManager {
   #mapHandler;
+  #formHandler;
   #containerWorkoutList;
   #intro;
   #appLogo;
@@ -376,6 +381,10 @@ class UIManager {
     this.#containerWorkoutList.addEventListener('click', this.#containerWorkoutCB.bind(this))
     this.#appLogo.addEventListener('click', this.#showAllMarkers.bind(this));
     this.#btnTheme.addEventListener('click', this.#toggleTheme.bind(this));
+  }
+
+  #init(formHandler) {
+    this.#formHandler = formHandler;
   }
 
   #hideIntro() {
@@ -430,7 +439,7 @@ class UIManager {
       </div>
     </li>`;
 
-    this.#containerWorkoutList.insertAdjacentHTML('afterbegin', html);
+    this.#formHandler.formWorkout.insertAdjacentHTML('afterend', html);
   }
 
   #renderWorkoutMarkerAndPopup(workout) {
@@ -494,6 +503,10 @@ class UIManager {
   }
 
   // Public APIs
+  init(formHandler) {
+    this.#init(formHandler);
+  }
+
   renderWorkoutListItem(workout) {
     this.#renderWorkoutListItem(workout);
   }
@@ -532,6 +545,7 @@ class App {
     // prettier-ignore
     this.#formHandler = new FormHandler(this.#workouts, CONFIG, this.#mapHandler, this.#uiManager, this.#localStorageHandler);
     this.#mapHandler.init(this.#uiManager, this.#formHandler);
+    this.#uiManager.init(this.#formHandler);
   }
 
   init() {

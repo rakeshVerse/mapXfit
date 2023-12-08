@@ -104,80 +104,79 @@
         </svg>
       </div>
 
-      <div class="intro">
-        <p>
-          Click on the <strong>map</strong> to start adding your workouts...
-        </p>
-      </div>
-
-      <!-- form error -->
-      <div class="form-error hidden-err">
-        <span class="err-code">Invalid input!</span>
-        <span class="err-msg">All inputs must be positive numbers.</span>
-      </div>
-
-      <!-- form -->
-      <form action="" class="workout-form hidden-form">
-        <span class="btn-form-close">x</span>
-        <div>
-          <label for="type">Type</label>
-          <select name="type" id="workout-type">
-            <option value="1">Running</option>
-            <option value="2">Cycling</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="distance">Distance</label>
-          <input
-            class="input"
-            type="text"
-            name="distance"
-            id="distance"
-            placeholder="km"
-            autofocus
-          />
-        </div>
-
-        <div>
-          <label for="duration">Duration</label>
-          <input
-            class="input"
-            type="text"
-            name="duration"
-            id=""
-            placeholder="min"
-          />
-        </div>
-
-        <div class="cadence-box type-toggle">
-          <label for="cadence">Cadence</label>
-          <input
-            class="input"
-            type="text"
-            name="cadence"
-            id=""
-            placeholder="step/min"
-          />
-        </div>
-
-        <div class="elevation-box type-toggle hidden">
-          <label for="elevation">Elev Gain</label>
-          <input
-            class="input workout-elevation"
-            type="text"
-            name="elevation"
-            id=""
-            placeholder="meters"
-            disabled
-          />
-        </div>
-
-        <button class="form-btn hidden">Submit</button>
-      </form>
-
       <!-- workouts -->
       <ul class="workout-list">
+        <div class="intro">
+          <p>
+            Click on the <strong>map</strong> to start adding your workouts...
+          </p>
+        </div>
+
+        <!-- form error -->
+        <div class="form-error hidden-err">
+          <span class="err-code">Invalid input!</span>
+          <span class="err-msg">All inputs must be positive numbers.</span>
+        </div>
+
+        <!-- form -->
+        <form action="" class="workout-form hidden-form">
+          <span class="btn-form-close">x</span>
+          <div>
+            <label for="type">Type</label>
+            <select name="type" id="workout-type">
+              <option value="1">Running</option>
+              <option value="2">Cycling</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="distance">Distance</label>
+            <input
+              class="input"
+              type="text"
+              name="distance"
+              id="distance"
+              placeholder="km"
+              autofocus
+            />
+          </div>
+
+          <div>
+            <label for="duration">Duration</label>
+            <input
+              class="input"
+              type="text"
+              name="duration"
+              id=""
+              placeholder="min"
+            />
+          </div>
+
+          <div class="cadence-box type-toggle">
+            <label for="cadence">Cadence</label>
+            <input
+              class="input"
+              type="text"
+              name="cadence"
+              id=""
+              placeholder="step/min"
+            />
+          </div>
+
+          <div class="elevation-box type-toggle hidden">
+            <label for="elevation">Elev Gain</label>
+            <input
+              class="input workout-elevation"
+              type="text"
+              name="elevation"
+              id=""
+              placeholder="meters"
+              disabled
+            />
+          </div>
+
+          <button class="form-btn hidden">Submit</button>
+        </form>
         <!-- running -->
         <!-- <li class="workout workout-1">
           <h2 class="workout-title">Running on Nov 18</h2>
@@ -238,6 +237,23 @@
           </div>
         </li> -->
       </ul>
+
+      <footer id="footer">
+        <p>
+          Copyright &copy;
+
+          <script type="text/javascript">
+            document.write(new Date().getFullYear());
+          </script>
+
+          <a
+            href="https://twitter.com/rakeshVerse"
+            target="_blank"
+            class="author"
+            >Rakesh Ramteke</a
+          >
+        </p>
+      </footer>
     </div>
 
     <!-- Map -->

@@ -64,7 +64,7 @@ body {
 .workout-container {
   background-color: var(--color-bg--1);
   flex-basis: 50rem;
-  padding: 3rem 4rem;
+  padding: 3rem 2rem;
 }
 
 /* Map container */
@@ -204,8 +204,10 @@ body {
   /* container top padding + logo height + logo margin bottom + margin bottom
   i.e. 3 + 6 + 3 + 3 = 15rem
   */
-  height: calc(100vh - 15rem);
+  /* height: calc(100vh - 15rem); */
+  height: 84vh;
   overflow-y: scroll;
+  padding: 0 1rem;
 }
 
 .workout {
@@ -267,6 +269,7 @@ body {
   background-color: var(--color-bg--2);
 }
 
+/* Theme */
 #btn-theme {
   position: absolute;
   right: 1%;
@@ -282,4 +285,15 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 3rem;
+}
+
+/* Footer */
+#footer {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-top: 1rem;
+}
+
+#footer .author {
+  color: var(--color-font--1);
 }
