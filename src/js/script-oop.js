@@ -344,20 +344,25 @@ class UIManager {
   #mapHandler;
   #containerWorkoutList;
   #intro;
+  #appLogo;
+  #workouts;
   #config;
 
-  constructor(config, mapHandler) {
+  constructor(workouts, config, mapHandler) {
     // DOM elements
     this.#containerWorkoutList = document.querySelector('.workout-list');
     this.#intro = document.querySelector('.intro');
+    this.#appLogo = document.querySelector('.app-logo-svg');
 
-    // setting attributes
+    // Setting attributes
+    this.#workouts = workouts;
     this.#config = config;
     this.#mapHandler = mapHandler;
 
     // EVENT HANDLERS
     // prettier-ignore
     this.#containerWorkoutList.addEventListener('click', this.#containerWorkoutCB.bind(this))
+    this.#appLogo.addEventListener('click', this.#showAllMarkers.bind(this));
   }
 
   #hideIntro() {
@@ -444,7 +449,12 @@ class UIManager {
     });
 
     // Fit all markers on the view port
-    const markers = workouts.map(workout => L.marker(workout.coords));
+    this.#showAllMarkers();
+  }
+
+  // Fit all markers on the view port
+  #showAllMarkers() {
+    const markers = this.#workouts.map(workout => L.marker(workout.coords));
     this.#mapHandler.map.flyToBounds(L.featureGroup(markers).getBounds(), {
       padding: L.point(50, 50),
     });
@@ -488,7 +498,7 @@ class App {
 
   constructor() {
     this.#mapHandler = new MapHandler(MAP_ZOOM, MAP_ZOOM_WORLD);
-    this.#uiManager = new UIManager(CONFIG, this.#mapHandler);
+    this.#uiManager = new UIManager(this.#workouts, CONFIG, this.#mapHandler);
     // prettier-ignore
     this.#localStorageHandler = new LocalStorageHandler(this.#workouts, LOCAL_STORAGE_KEY, this.#mapHandler, this.#uiManager);
     // prettier-ignore
