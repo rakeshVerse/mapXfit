@@ -56,12 +56,23 @@ class MapHandler {
 
     // Register map click event
     this.#map.on('click', this.#onMapClick.bind(this));
+
+    // Search address
+    this.#searchAddress(this.#map);
   }
 
   #onMapClick(e) {
     this.#formHandler.showForm();
     this.#uiManager.hideIntro();
     this.#mapEvent = e; // store map event
+  }
+
+  #searchAddress(map) {
+    L.Control.geocoder()
+      .on('markgeocode', function (e) {
+        map.setView(e.geocode.center, map.getZoom()); // Set the map view to the found location
+      })
+      .addTo(map);
   }
 
   init(uiManager, formHandler) {
