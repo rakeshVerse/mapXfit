@@ -273,7 +273,7 @@ body {
 #btn-theme {
   position: absolute;
   right: 1%;
-  top: 1%;
+  bottom: 3%;
   z-index: 10000;
 
   background-color: #fff;
@@ -296,4 +296,18 @@ body {
 
 #footer .author {
   color: var(--color-font--1);
+}
+
+/* Custom styles for the address search bar */
+.leaflet-control-geocoder-form {
+  width: 300px;
+}
+
+.leaflet-control-geocoder-form input {
+  font-size: 16px;
+}
+
+.leaflet-control-geocoder-alternatives {
+  font-size: 16px;
+  width: 330px;
 }
